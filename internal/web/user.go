@@ -3,7 +3,6 @@ package web
 import (
 	"Learn/LittleRedBook/internal/domain"
 	"Learn/LittleRedBook/internal/service"
-	"fmt"
 	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
@@ -91,8 +90,11 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		Password: req.Password,
 	})
 
+	if err == service.ErrUserDuplicateEmail {
+		ctx.String(http.StatusInternalServerError, "该邮箱已被注册")
+		return
+	}
 	if err != nil {
-		fmt.Println(err)
 		ctx.String(http.StatusInternalServerError, "系统错误")
 		return
 	}

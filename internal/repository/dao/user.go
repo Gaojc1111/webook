@@ -2,9 +2,16 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+
 	"gorm.io/gorm"
+)
+
+var (
+	ErrUserDuplicateEmail = errors.New("该邮箱已被注册")
 )
 
 type UserDAO struct {
@@ -29,5 +36,13 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 	now := time.Now().UnixMilli()
 	u.CreateTime = now
 	u.UpdateTime = now
-	return dao.db.WithContext(ctx).Create(&u).Error
+	err := dao.db.WithContext(ctx).Create(&u).Error
+	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+		const uniqueConflictsErrNo uint16 = 1062
+		if mysqlErr.Number == uniqueConflictsErrNo {
+			// 邮箱冲突（唯一键）
+			return ErrUserDuplicateEmail
+		}
+	}
+	return err
 }

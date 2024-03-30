@@ -1,6 +1,9 @@
 create database RedBook;
-use RedBook;
-create table Student (
-    id int,
-    name varchar(10)
+use redbook;
+create table user (
+    id bigint,
+    email varchar(20),
+    password varchar(20),
+    createTime bigint,
+    updateTime bigint
 );

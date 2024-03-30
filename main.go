@@ -16,12 +16,11 @@ import (
 
 func main() {
 	db := initDB()
-	u := initUser(db)
-
-	// 路由
 	server := initWebserver()
 
+	u := initUser(db)
 	u.RegisterRoutes(server)
+
 	server.Run(":8080")
 }
 
@@ -56,7 +55,7 @@ func initUser(db *gorm.DB) *web.UserHandler {
 }
 
 func initDB() *gorm.DB {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:13316)/RedBook"))
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:3306)/RedBook"))
 	if err != nil {
 		panic(err)
 	}
