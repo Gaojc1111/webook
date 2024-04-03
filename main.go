@@ -8,7 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,6 +23,7 @@ func main() {
 
 	u := initUser(db)
 	u.RegisterRoutes(server)
+	//pprof.Register(server) // 性能分析: 注册pprof相关路由
 
 	server.Run(":8080")
 }
@@ -43,6 +47,10 @@ func initWebserver() *gin.Engine {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
+
+	store := cookie.NewStore([]byte("secret"))
+	server.Use(sessions.Sessions("mysession", store))
+
 	return server
 }
 
@@ -55,7 +63,7 @@ func initUser(db *gorm.DB) *web.UserHandler {
 }
 
 func initDB() *gorm.DB {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:3306)/RedBook"))
+	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:3306)/redbook"))
 	if err != nil {
 		panic(err)
 	}
