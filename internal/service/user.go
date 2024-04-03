@@ -33,22 +33,22 @@ func (svc *UserService) SignUp(ctx context.Context, u domain.User) error {
 	return svc.repo.Create(ctx, u)
 }
 
-func (svc *UserService) Login(ctx context.Context, email, password string) error {
+func (svc *UserService) Login(ctx context.Context, email, password string) (domain.User, error) {
 	// 先查询有没有这个用户
-	u, err := svc.repo.FindByEmail(ctx, email)
+	user, err := svc.repo.FindByEmail(ctx, email)
 	if err == repository.ErrUserNotFound {
 		// todo
-		return ErrInvalidUserOrPassword
+		return user, ErrInvalidUserOrPassword
 	}
 	if err != nil {
-		return err
+		return user, err
 	}
 	// 比较密码
-	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		// todo 打印日志
-		return ErrInvalidUserOrPassword
+		return user, ErrInvalidUserOrPassword
 	}
 	// 没问题
-	return nil
+	return user, nil
 }

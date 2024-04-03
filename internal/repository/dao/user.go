@@ -22,7 +22,7 @@ type UserDAO struct {
 // User 直接对应数据库表
 // entity/model
 type User struct {
-	Id         int64  `gorm:"primaryKey,autoIncrement"`
+	ID         int64  `gorm:"primaryKey,autoIncrement"`
 	Email      string `gorm:"unique"`
 	Password   string
 	CreateTime int64 `gorm:"column:createTime"`
@@ -49,11 +49,9 @@ func (dao *UserDAO) Insert(ctx context.Context, u User) error {
 }
 
 func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error) {
-	u := User{}
+	user := User{}
 	// 查找email = email 的第一条记录
-	err := dao.db.WithContext(ctx).Where("email = ?", email).First(&u).Error
-	//if err != nil {
-	//
-	//}
-	return u, err
+	err := dao.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
+
+	return user, err
 }

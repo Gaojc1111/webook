@@ -10,6 +10,8 @@ import (
 
 func TestSession(t *testing.T) {
 	r := gin.Default()
+
+	// 下面两行为核心
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 

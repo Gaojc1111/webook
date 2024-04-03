@@ -5,6 +5,8 @@ import (
 	"Learn/LittleRedBook/internal/service"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
+
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
 )
@@ -111,10 +113,13 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		Password string `json:"password"`
 	}
 	var req LoginReq
+
+	// 解析JSON数据
 	if err := ctx.Bind(&req); err != nil {
 		return
 	}
-	err := u.svc.Login(ctx, req.Email, req.Password)
+	// 身份校验
+	user, err := u.svc.Login(ctx, req.Email, req.Password)
 	if err == service.ErrInvalidUserOrPassword {
 		ctx.String(http.StatusOK, "邮箱或密码错误")
 		return
@@ -123,6 +128,17 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "系统错误")
 		return
 	}
+
+	// 设置session
+	session := sessions.Default(ctx)
+	session.Set("userID", user.ID) // 把userID 存入session
+	err = session.Save()
+	// session 保存失败
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
 	ctx.String(http.StatusOK, "登录成功")
 	return
 }

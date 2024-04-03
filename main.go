@@ -5,6 +5,7 @@ import (
 	"Learn/LittleRedBook/internal/repository/dao"
 	"Learn/LittleRedBook/internal/service"
 	"Learn/LittleRedBook/internal/web"
+	"Learn/LittleRedBook/internal/web/middlewares"
 	"strings"
 	"time"
 
@@ -48,8 +49,12 @@ func initWebserver() *gin.Engine {
 		MaxAge: 12 * time.Hour,
 	}))
 
+	// 注册session接口
 	store := cookie.NewStore([]byte("secret"))
-	server.Use(sessions.Sessions("mysession", store))
+	server.Use(sessions.Sessions("mysession", store)) // 设置session的名字
+
+	// session 验证
+	server.Use(middlewares.NewLoginMiddlewareBuilder().Build())
 
 	return server
 }
