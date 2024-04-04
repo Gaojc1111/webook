@@ -132,6 +132,9 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 	// 2.设置session
 	session := sessions.Default(ctx)
 	session.Set("userID", user.ID) // 把userID 存入session
+	session.Options(sessions.Options{
+		MaxAge: 60 * 30, //30min
+	})
 	err = session.Save()
 	// session 保存失败
 	if err != nil {
@@ -141,6 +144,15 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 
 	ctx.String(http.StatusOK, "登录成功")
 	return
+}
+
+func (u *UserHandler) Logout(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	session.Options(sessions.Options{
+		MaxAge: -1,
+	})
+	session.Save()
+	ctx.String(http.StatusOK, "退出登录成功...")
 }
 
 func (u *UserHandler) Edit(ctx *gin.Context) {
