@@ -1,8 +1,8 @@
 package web
 
 import (
-	"Learn/LittleRedBook/internal/domain"
-	"Learn/LittleRedBook/internal/service"
+	"LittleRedBook/internal/domain"
+	"LittleRedBook/internal/service"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -148,5 +148,5 @@ func (u *UserHandler) Edit(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
-
+	ctx.String(200, "用户信息...")
 }

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"Learn/LittleRedBook/internal/domain"
-	"Learn/LittleRedBook/internal/repository"
+	"LittleRedBook/internal/domain"
+	"LittleRedBook/internal/repository"
 	"context"
 	"errors"
 

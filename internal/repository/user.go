@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"Learn/LittleRedBook/internal/domain"
-	"Learn/LittleRedBook/internal/repository/dao"
+	"LittleRedBook/internal/domain"
+	"LittleRedBook/internal/repository/dao"
 	"context"
 )
 
