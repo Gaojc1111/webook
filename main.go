@@ -6,13 +6,13 @@ import (
 	"LittleRedBook/internal/service"
 	"LittleRedBook/internal/web"
 	"LittleRedBook/internal/web/middlewares"
+	"github.com/gin-contrib/sessions/memstore"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -49,12 +49,16 @@ func initWebserver() *gin.Engine {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	// 注册session接口
-	store := cookie.NewStore([]byte("secret"))
-	server.Use(sessions.Sessions("mysession", store)) // 设置session的名字
+	// 1.注册session接口
+	//store := cookie.NewStore([]byte("secret"))
+	store := memstore.NewStore([]byte("nrIIa0oSzeE4tMQ3KqssIw4t3RXR28MA"), []byte("gxZcK8ECTOzqxpcWx0AXxdohFCVCDPtq"))
+	server.Use(sessions.Sessions("session", store)) // 设置session的名字
 
-	// session 验证
-	server.Use(middlewares.NewLoginMiddlewareBuilder().Build())
+	// 3.session 验证
+	server.Use(middlewares.NewLoginMiddlewareBuilder().
+		IgnorePaths("/users/login").
+		IgnorePaths("/users/signup").
+		Build())
 
 	return server
 }

@@ -3,9 +3,9 @@ package web
 import (
 	"LittleRedBook/internal/domain"
 	"LittleRedBook/internal/service"
-	"net/http"
-
+	"errors"
 	"github.com/gin-contrib/sessions"
+	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
@@ -120,7 +120,7 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 	}
 	// 身份校验
 	user, err := u.svc.Login(ctx, req.Email, req.Password)
-	if err == service.ErrInvalidUserOrPassword {
+	if errors.Is(err, service.ErrInvalidUserOrPassword) {
 		ctx.String(http.StatusOK, "邮箱或密码错误")
 		return
 	}
@@ -129,7 +129,7 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	// 设置session
+	// 2.设置session
 	session := sessions.Default(ctx)
 	session.Set("userID", user.ID) // 把userID 存入session
 	err = session.Save()
