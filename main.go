@@ -6,11 +6,8 @@ import (
 	"LittleRedBook/internal/service"
 	"LittleRedBook/internal/web"
 	"LittleRedBook/internal/web/middlewares"
-	"github.com/gin-contrib/sessions/memstore"
 	"strings"
 	"time"
-
-	"github.com/gin-contrib/sessions"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -37,9 +34,10 @@ func initWebserver() *gin.Engine {
 	// https://github.com/gin-contrib/cors
 	server.Use(cors.New(cors.Config{
 		//AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:  []string{"PUT", "PATCH", "GET", "POST"},
-		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders: []string{"Content-Length"},
+		AllowMethods: []string{"PUT", "PATCH", "GET", "POST"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
+		// JWT 放行
+		ExposeHeaders: []string{"Content-Length", "x-jwt-token"},
 
 		AllowCredentials: true,
 		// 放行所有包含http://localhost 前缀的域名
@@ -51,11 +49,17 @@ func initWebserver() *gin.Engine {
 
 	// 1.注册session接口
 	//store := cookie.NewStore([]byte("secret"))
-	store := memstore.NewStore([]byte("nrIIa0oSzeE4tMQ3KqssIw4t3RXR28MA"), []byte("gxZcK8ECTOzqxpcWx0AXxdohFCVCDPtq"))
-	server.Use(sessions.Sessions("session", store)) // 设置session的名字
+	//store := memstore.NewStore([]byte("nrIIa0oSzeE4tMQ3KqssIw4t3RXR28MA"), []byte("gxZcK8ECTOzqxpcWx0AXxdohFCVCDPtq"))
+	//server.Use(sessions.Sessions("session", store)) // 设置session的名字
 
 	// 3.session 验证
-	server.Use(middlewares.NewLoginMiddlewareBuilder().
+	//server.Use(middlewares.NewLoginMiddlewareBuilder().
+	//	IgnorePaths("/users/login").
+	//	IgnorePaths("/users/signup").
+	//	Build())
+
+	// JWT 验证
+	server.Use(middlewares.NewLoginJWTMiddlewareBuilder().
 		IgnorePaths("/users/login").
 		IgnorePaths("/users/signup").
 		Build())

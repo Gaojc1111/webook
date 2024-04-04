@@ -4,11 +4,13 @@ import (
 	"LittleRedBook/internal/domain"
 	"LittleRedBook/internal/service"
 	"errors"
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"net/http"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // UserHandler 定义用户相关路由
@@ -42,7 +44,8 @@ func NewUserHandler(svc *service.UserService) *UserHandler {
 func (u *UserHandler) RegisterRoutes(server *gin.Engine) {
 	// todo
 	server.POST("/users/signup", u.SignUp)
-	server.POST("/users/login", u.Login)
+	//server.POST("/users/login", u.Login)
+	server.POST("/users/login", u.LoginJWT)
 	server.POST("/users/edit", u.Edit)
 	server.GET("/users/profile", u.Profile)
 }
@@ -107,6 +110,42 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 
 }
 
+func (u *UserHandler) LoginJWT(ctx *gin.Context) {
+	type LoginReq struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	var req LoginReq
+
+	// 解析JSON数据
+	if err := ctx.Bind(&req); err != nil {
+		return
+	}
+	// 身份校验
+	user, err := u.svc.Login(ctx, req.Email, req.Password)
+	if errors.Is(err, service.ErrInvalidUserOrPassword) {
+		ctx.String(http.StatusOK, "邮箱或密码错误")
+		return
+	}
+	if err != nil {
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+
+	// 2.生成JWT
+	token := jwt.New(jwt.SigningMethodHS512)
+	tokenStr, err := token.SignedString([]byte("Hbzhtd0211"))
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "系统错误")
+		return
+	}
+	ctx.Header("x-jwt-token", tokenStr)
+	fmt.Println(user)
+
+	ctx.String(http.StatusOK, "登录成功")
+	return
+}
+
 func (u *UserHandler) Login(ctx *gin.Context) {
 	type LoginReq struct {
 		Email    string `json:"email"`
@@ -151,7 +190,10 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 	session.Options(sessions.Options{
 		MaxAge: -1,
 	})
-	session.Save()
+	err := session.Save()
+	if err != nil {
+		return
+	}
 	ctx.String(http.StatusOK, "退出登录成功...")
 }
 
