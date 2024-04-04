@@ -1,11 +1,11 @@
 package main
 
 import (
-	"Learn/LittleRedBook/internal/repository"
-	"Learn/LittleRedBook/internal/repository/dao"
-	"Learn/LittleRedBook/internal/service"
-	"Learn/LittleRedBook/internal/web"
-	"Learn/LittleRedBook/internal/web/middlewares"
+	"LittleRedBook/internal/repository"
+	"LittleRedBook/internal/repository/dao"
+	"LittleRedBook/internal/service"
+	"LittleRedBook/internal/web"
+	"LittleRedBook/internal/web/middlewares"
 	"strings"
 	"time"
 
