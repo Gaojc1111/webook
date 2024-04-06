@@ -112,7 +112,8 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 
 type UserClaims struct {
 	jwt.RegisteredClaims
-	UserID int64
+	UserID    int64
+	UserAgent string
 }
 
 func (u *UserHandler) LoginJWT(ctx *gin.Context) {
@@ -139,7 +140,8 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 
 	// 2.生成JWT
 	claims := UserClaims{
-		UserID: user.ID,
+		UserID:    user.ID,
+		UserAgent: ctx.Request.UserAgent(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString([]byte("Hbzhtd0211"))

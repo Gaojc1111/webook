@@ -69,6 +69,11 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 			return
 		}
 
+		if claims.UserAgent != ctx.Request.UserAgent() {
+			// 比如： 登录在谷歌，其他操作在bing
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
 		if claims.UserID == 0 {
 			// 没登录
 			ctx.AbortWithStatus(http.StatusUnauthorized)

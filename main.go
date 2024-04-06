@@ -50,6 +50,13 @@ func initWebserver() *gin.Engine {
 		MaxAge: 12 * time.Hour,
 	}))
 
+	//redisClient := redis.NewClient(&redis.Options{
+	//	Addr: "localhost:6379",
+	//})
+	//
+	//server.Use(ratelimit.NewBuilder(redisClient,
+	//	time.Second, 1).Build())
+
 	// JWT 验证
 	server.Use(middlewares.NewLoginJWTMiddlewareBuilder().
 		IgnorePaths("/users/login").
