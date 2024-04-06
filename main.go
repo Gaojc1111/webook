@@ -23,7 +23,10 @@ func main() {
 	u.RegisterRoutes(server)
 	//pprof.Register(server) // 性能分析: 注册pprof相关路由
 
-	server.Run(":8080")
+	err := server.Run(":8080")
+	if err != nil {
+		return
+	}
 }
 
 func initWebserver() *gin.Engine {
@@ -46,17 +49,6 @@ func initWebserver() *gin.Engine {
 		},
 		MaxAge: 12 * time.Hour,
 	}))
-
-	// 1.注册session接口
-	//store := cookie.NewStore([]byte("secret"))
-	//store := memstore.NewStore([]byte("nrIIa0oSzeE4tMQ3KqssIw4t3RXR28MA"), []byte("gxZcK8ECTOzqxpcWx0AXxdohFCVCDPtq"))
-	//server.Use(sessions.Sessions("session", store)) // 设置session的名字
-
-	// 3.session 验证
-	//server.Use(middlewares.NewLoginMiddlewareBuilder().
-	//	IgnorePaths("/users/login").
-	//	IgnorePaths("/users/signup").
-	//	Build())
 
 	// JWT 验证
 	server.Use(middlewares.NewLoginJWTMiddlewareBuilder().

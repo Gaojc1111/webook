@@ -110,6 +110,11 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 
 }
 
+type UserClaims struct {
+	jwt.RegisteredClaims
+	UserID int64
+}
+
 func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	type LoginReq struct {
 		Email    string `json:"email"`
@@ -133,7 +138,10 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	}
 
 	// 2.生成JWT
-	token := jwt.New(jwt.SigningMethodHS512)
+	claims := UserClaims{
+		UserID: user.ID,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString([]byte("Hbzhtd0211"))
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "系统错误")

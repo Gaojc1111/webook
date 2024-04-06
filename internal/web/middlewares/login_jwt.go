@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"LittleRedBook/internal/web"
 	"encoding/gob"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -50,9 +51,9 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 			return
 		}
 		tokenStr = segs[1]
-
-		// token校验
-		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		claims := &web.UserClaims{}
+		// token校验，ParseWithClaims要传指针
+		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("Hbzhtd0211"), nil
 		})
 		if err != nil {
@@ -67,5 +68,11 @@ func (l *LoginJWTMiddlewareBuilder) Build() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+
+		if claims.UserID == 0 {
+			// 没登录
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+		}
+
 	}
 }
