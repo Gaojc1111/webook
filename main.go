@@ -6,6 +6,7 @@ import (
 	"LittleRedBook/internal/service"
 	"LittleRedBook/internal/web"
 	"LittleRedBook/internal/web/middlewares"
+	"net/http"
 	"strings"
 	"time"
 
@@ -16,13 +17,16 @@ import (
 )
 
 func main() {
-	db := initDB()
-	server := initWebserver()
+	//db := initDB()
+	//server := initWebserver()
 
-	u := initUser(db)
-	u.RegisterRoutes(server)
+	//u := initUser(db)
+	//u.RegisterRoutes(server)
 	//pprof.Register(server) // 性能分析: 注册pprof相关路由
-
+	server := gin.Default()
+	server.GET("/hello", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "hello world...")
+	})
 	err := server.Run(":8080")
 	if err != nil {
 		return

@@ -145,6 +145,7 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 	tokenStr, err := token.SignedString([]byte("Hbzhtd0211"))
+
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, "系统错误")
 		return
