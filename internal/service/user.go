@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/redis/go-redis/v9"
 	"webook/internal/domain"
 	"webook/internal/repository"
 
@@ -13,7 +14,8 @@ var ErrUserDuplicateEmail = repository.ErrUserDuplicateEmail
 var ErrInvalidUserOrPassword = errors.New("邮箱或密码错误")
 
 type UserService struct {
-	repo *repository.UserRepository
+	repo  *repository.UserRepository
+	redis *redis.Client
 }
 
 func NewUserService(repo *repository.UserRepository) *UserService {
@@ -51,4 +53,9 @@ func (svc *UserService) Login(ctx context.Context, email, password string) (doma
 	}
 	// 没问题
 	return user, nil
+}
+
+func (svc *UserService) Profile(ctx context.Context, id int64) (domain.User, error) {
+	user, err := svc.repo.FindByID(ctx, id)
+	return user, err
 }

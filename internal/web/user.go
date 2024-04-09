@@ -209,9 +209,7 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Edit(ctx *gin.Context) {
-
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
-	ctx.String(200, "用户信息...")
 }

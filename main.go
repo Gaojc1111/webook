@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/redis/go-redis/v9"
 	"strings"
 	"time"
 	"webook/config"
 	"webook/internal/repository"
+	"webook/internal/repository/cache"
 	"webook/internal/repository/dao"
 	"webook/internal/service"
 	"webook/internal/web"
@@ -70,7 +72,13 @@ func initWebserver() *gin.Engine {
 
 func initUser(db *gorm.DB) *web.UserHandler {
 	ud := dao.NewUserDAO(db)
-	repo := repository.NewUserRepository(ud)
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	uc := cache.NewUserCache(client)
+	repo := repository.NewUserRepository(ud, uc)
 	svc := service.NewUserService(repo)
 	u := web.NewUserHandler(svc)
 	return u
