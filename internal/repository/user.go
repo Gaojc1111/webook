@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"LittleRedBook/internal/domain"
-	"LittleRedBook/internal/repository/dao"
 	"context"
+	"webook/internal/domain"
+	"webook/internal/repository/dao"
 )
 
 var (

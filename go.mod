@@ -1,4 +1,4 @@
-module LittleRedBook
+module webook
 
 go 1.22.1
 

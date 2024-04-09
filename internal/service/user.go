@@ -1,10 +1,10 @@
 package service
 
 import (
-	"LittleRedBook/internal/domain"
-	"LittleRedBook/internal/repository"
 	"context"
 	"errors"
+	"webook/internal/domain"
+	"webook/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )

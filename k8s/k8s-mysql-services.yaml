@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webook-mysql
+spec:
+  selector:
+    app: webook-mysql
+  ports:
+    - protocol: TCP
+      # web 访问端口
+      port: 13309
+      targetPort: 3306
+      nodePort: 30001
+  type: NodePort
+  

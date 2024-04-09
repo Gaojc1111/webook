@@ -1,12 +1,12 @@
 package web
 
 import (
-	"LittleRedBook/internal/domain"
-	"LittleRedBook/internal/service"
 	"errors"
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"net/http"
+	"webook/internal/domain"
+	"webook/internal/service"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"

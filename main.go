@@ -1,14 +1,14 @@
 package main
 
 import (
-	"LittleRedBook/internal/repository"
-	"LittleRedBook/internal/repository/dao"
-	"LittleRedBook/internal/service"
-	"LittleRedBook/internal/web"
-	"LittleRedBook/internal/web/middlewares"
-	"net/http"
 	"strings"
 	"time"
+	"webook/config"
+	"webook/internal/repository"
+	"webook/internal/repository/dao"
+	"webook/internal/service"
+	"webook/internal/web"
+	"webook/internal/web/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -17,16 +17,13 @@ import (
 )
 
 func main() {
-	//db := initDB()
-	//server := initWebserver()
+	db := initDB()
+	server := initWebserver()
 
-	//u := initUser(db)
-	//u.RegisterRoutes(server)
+	u := initUser(db)
+	u.RegisterRoutes(server)
 	//pprof.Register(server) // 性能分析: 注册pprof相关路由
-	server := gin.Default()
-	server.GET("/hello", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "hello world...")
-	})
+	//server := gin.Default()
 	err := server.Run(":8080")
 	if err != nil {
 		return
@@ -54,6 +51,7 @@ func initWebserver() *gin.Engine {
 		MaxAge: 12 * time.Hour,
 	}))
 
+	// redis限流
 	//redisClient := redis.NewClient(&redis.Options{
 	//	Addr: "localhost:6379",
 	//})
@@ -79,7 +77,7 @@ func initUser(db *gorm.DB) *web.UserHandler {
 }
 
 func initDB() *gorm.DB {
-	db, err := gorm.Open(mysql.Open("root:root@tcp(localhost:3306)/redbook"))
+	db, err := gorm.Open(mysql.Open(config.Config.DB.DSN))
 	if err != nil {
 		panic(err)
 	}

@@ -12,3 +12,9 @@ services:
     ports:
       #   注意
       - "13316:3306"
+  redis:
+    image: redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
