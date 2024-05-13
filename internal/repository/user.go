@@ -2,14 +2,15 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"webook/internal/domain"
 	"webook/internal/repository/cache"
 	"webook/internal/repository/dao"
 )
 
 var (
-	ErrUserDuplicateEmail = dao.ErrUserDuplicateEmail
-	ErrUserNotFound       = dao.ErrUserNotFound
+	ErrUserDuplicated = dao.ErrUserDuplicated
+	ErrUserNotFound   = dao.ErrUserNotFound
 )
 
 type UserRepository struct {
@@ -24,11 +25,32 @@ func NewUserRepository(dao *dao.UserDAO, c *cache.UserCache) *UserRepository {
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
-	return r.dao.Insert(ctx, dao.User{
-		Email:    u.Email,
+func (repo *UserRepository) toDomain(u dao.User) domain.User {
+	return domain.User{
+		ID:       u.ID,
+		Email:    u.Email.String,
+		Phone:    u.Phone.String,
 		Password: u.Password,
-	})
+	}
+}
+
+func (r *UserRepository) toEntity(u domain.User) dao.User {
+	return dao.User{
+		ID: u.ID,
+		Email: sql.NullString{
+			String: u.Email,
+			Valid:  u.Email != "",
+		},
+		Password: u.Password,
+		Phone: sql.NullString{
+			String: u.Phone,
+			Valid:  u.Phone != "",
+		},
+	}
+}
+
+func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
+	return r.dao.Insert(ctx, r.toEntity(u))
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.User, error) {
@@ -38,7 +60,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (domain.
 	}
 	return domain.User{
 		ID:       user.ID,
-		Email:    user.Email,
+		Email:    user.Email.String,
 		Password: user.Password,
 	}, err
 }
@@ -57,7 +79,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id int64) (domain.User, e
 
 	user = domain.User{
 		ID:       u.ID,
-		Email:    u.Email,
+		Email:    u.Email.String,
 		Password: u.Password,
 	}
 	go func() {
@@ -68,4 +90,12 @@ func (r *UserRepository) FindByID(ctx context.Context, id int64) (domain.User, e
 		}
 	}()
 	return user, err
+}
+
+func (repo *UserRepository) FindByPhone(ctx context.Context, phone string) (domain.User, error) {
+	u, err := repo.dao.FindByPhone(ctx, phone)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return repo.toDomain(u), nil
 }

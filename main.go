@@ -9,6 +9,7 @@ import (
 	"webook/internal/repository/cache"
 	"webook/internal/repository/dao"
 	"webook/internal/service"
+	"webook/internal/service/sms/localsms"
 	"webook/internal/web"
 	"webook/internal/web/middlewares"
 
@@ -65,6 +66,8 @@ func initWebserver() *gin.Engine {
 	server.Use(middlewares.NewLoginJWTMiddlewareBuilder().
 		IgnorePaths("/users/login").
 		IgnorePaths("/users/signup").
+		IgnorePaths("/users/login_sms/code/send").
+		IgnorePaths("/users/login_sms").
 		Build())
 
 	return server
@@ -73,15 +76,19 @@ func initWebserver() *gin.Engine {
 func initUser(db *gorm.DB) *web.UserHandler {
 	ud := dao.NewUserDAO(db)
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     config.Config.Redis.Addr,
 		Password: "",
 		DB:       0,
 	})
-	uc := cache.NewUserCache(client)
-	repo := repository.NewUserRepository(ud, uc)
-	svc := service.NewUserService(repo)
-	u := web.NewUserHandler(svc)
-	return u
+	//codeSv
+	user_cache := cache.NewUserCache(client)
+	code_cache := cache.NewCodeCache(client)
+	user_repo := repository.NewUserRepository(ud, user_cache)
+	code_repo := repository.NewCodeRepository(code_cache)
+	userSvc := service.NewUserService(user_repo)
+	codeSvc := service.NewCodeService(code_repo, localsms.NewService())
+	userHandler := web.NewUserHandler(userSvc, codeSvc)
+	return userHandler
 }
 
 func initDB() *gorm.DB {

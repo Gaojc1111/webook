@@ -5,6 +5,7 @@ type User struct {
 	ID       int64
 	Email    string
 	Password string
+	Phone    string
 }
 
 type Address struct {
