@@ -27,14 +27,14 @@ var (
 
 // UserHandler 定义用户相关路由
 type UserHandler struct {
-	svc            *service.UserService
-	codeSvc        *service.CodeService
+	svc            service.UserService
+	codeSvc        service.CodeService
 	regexpEmail    *regexp.Regexp
 	regexpPassword *regexp.Regexp
 }
 
 // NewUserHandler 新建一个UserHandler 包含email 和 password 的正则预编译
-func NewUserHandler(svc *service.UserService, codeSvc *service.CodeService) *UserHandler {
+func NewUserHandler(svc service.UserService, codeSvc service.CodeService) *UserHandler {
 	return &UserHandler{
 		svc:            svc,
 		codeSvc:        codeSvc,

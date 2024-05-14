@@ -7,7 +7,7 @@ import (
 )
 
 type CodeService struct {
-	repo *repository.CodeRepository
+	repo *repository.CachedCodeRepository
 	sms  sms.Service
 }
 

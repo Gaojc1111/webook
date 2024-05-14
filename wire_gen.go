@@ -23,7 +23,7 @@ func initWebServer() *gin.Engine {
 	userDAO := dao.NewUserDAO(db)
 	cmdable := ioc.InitRedis()
 	userCache := cache.NewUserCache(cmdable)
-	userRepository := repository.NewUserRepository(userDAO, userCache)
+	userRepository := repository.NewCachedUserRepository(userDAO, userCache)
 	userService := service.NewUserService(userRepository)
 	codeCache := cache.NewCodeCache(cmdable)
 	codeRepository := repository.NewCodeRepository(codeCache)

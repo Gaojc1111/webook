@@ -11,14 +11,19 @@ import (
 
 var ErrKeyNotExist = redis.Nil
 
-type UserCache struct {
+type UserCache interface {
+	Set(ctx context.Context, user domain.User) error
+	Get(ctx context.Context, id int64) (domain.User, error)
+}
+
+type RedisUserCache struct {
 	client     redis.Cmdable
 	expiration time.Duration
 }
 
 // NewUserCache 用什么就让他传什么
-func NewUserCache(client redis.Cmdable) *UserCache {
-	return &UserCache{
+func NewUserCache(client redis.Cmdable) UserCache {
+	return &RedisUserCache{
 		client:     client,
 		expiration: time.Minute * 15,
 	}
@@ -28,7 +33,7 @@ type Config struct {
 	Addr string
 }
 
-func (cache *UserCache) Get(ctx context.Context, id int64) (domain.User, error) {
+func (cache *RedisUserCache) Get(ctx context.Context, id int64) (domain.User, error) {
 	key := cache.Key(id)
 	val, err := cache.client.Get(ctx, key).Bytes()
 	if err != nil {
@@ -39,7 +44,7 @@ func (cache *UserCache) Get(ctx context.Context, id int64) (domain.User, error) 
 	return user, err
 }
 
-func (cache *UserCache) Set(ctx context.Context, user domain.User) error {
+func (cache *RedisUserCache) Set(ctx context.Context, user domain.User) error {
 	val, err := json.Marshal(user)
 	if err != nil {
 		return err
@@ -48,6 +53,6 @@ func (cache *UserCache) Set(ctx context.Context, user domain.User) error {
 	return cache.client.Set(ctx, key, val, cache.expiration).Err()
 }
 
-func (cache *UserCache) Key(id int64) string {
+func (cache *RedisUserCache) Key(id int64) string {
 	return fmt.Sprintf("user:info:%d", id)
 }

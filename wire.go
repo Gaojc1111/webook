@@ -23,7 +23,7 @@ func initWebServer() *gin.Engine {
 		cache.NewUserCache, cache.NewCodeCache,
 
 		// repository
-		repository.NewUserRepository, repository.NewCodeRepository,
+		repository.NewCachedUserRepository, repository.NewCodeRepository,
 
 		// service
 		ioc.InitSMSService,

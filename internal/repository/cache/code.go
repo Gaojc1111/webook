@@ -21,12 +21,17 @@ var (
 	ErrCodeVerifyTooMany = errors.New("验证码验证次数太多")
 )
 
-type CodeCache struct {
+type CodeCache interface {
+	Set(ctx context.Context, biz, phone, code string) error
+	Verify(ctx context.Context, biz, phone, code string) (bool, error)
+}
+
+type RedisCodeCache struct {
 	client redis.Cmdable
 }
 
-func NewCodeCache(client redis.Cmdable) *CodeCache {
-	return &CodeCache{
+func NewCodeCache(client redis.Cmdable) CodeCache {
+	return &RedisCodeCache{
 		client: client,
 	}
 }
@@ -37,7 +42,7 @@ func NewCodeCache(client redis.Cmdable) *CodeCache {
 // phone: 手机号码。
 // code: 验证码。
 // 返回值: 错误信息，如果操作成功，则返回nil；否则返回相应的错误。
-func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
+func (c *RedisCodeCache) Set(ctx context.Context, biz, phone, code string) error {
 	// 使用Lua脚本将验证码设置到Redis缓存中，并返回结果。
 	res, err := c.client.Eval(ctx, luaSetCode, []string{c.Key(biz, phone)}, code).Int()
 	if err != nil {
@@ -56,7 +61,7 @@ func (c *CodeCache) Set(ctx context.Context, biz, phone, code string) error {
 	}
 }
 
-func (c *CodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, error) {
+func (c *RedisCodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, error) {
 	// 获取缓存中的验证码。
 	res, err := c.client.Eval(ctx, luaVerifyCode, []string{c.Key(biz, phone)}, code).Int()
 	if err != nil {
@@ -72,6 +77,6 @@ func (c *CodeCache) Verify(ctx context.Context, biz, phone, code string) (bool, 
 	}
 }
 
-func (c *CodeCache) Key(biz, phone string) string {
+func (c *RedisCodeCache) Key(biz, phone string) string {
 	return fmt.Sprintf("phone:_code:%s:%s", biz, phone)
 }
