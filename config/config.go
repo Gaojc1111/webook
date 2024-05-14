@@ -10,5 +10,7 @@ type DBConfig struct {
 }
 
 type RedisConfig struct {
-	Addr string
+	Addr     string
+	Password string
+	DB       int
 }

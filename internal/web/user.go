@@ -19,6 +19,12 @@ const (
 	bizLogin      = "Login"
 )
 
+var (
+	// 正则校验
+	regexEmail    = regexp.MustCompile(emailRegex, 0)
+	regexPassword = regexp.MustCompile(passwordRegex, regexp.None)
+)
+
 // UserHandler 定义用户相关路由
 type UserHandler struct {
 	svc            *service.UserService
@@ -29,10 +35,6 @@ type UserHandler struct {
 
 // NewUserHandler 新建一个UserHandler 包含email 和 password 的正则预编译
 func NewUserHandler(svc *service.UserService, codeSvc *service.CodeService) *UserHandler {
-	// 正则格式校验
-	regexEmail := regexp.MustCompile(emailRegex, 0)
-	regexPassword := regexp.MustCompile(passwordRegex, regexp.None)
-
 	return &UserHandler{
 		svc:            svc,
 		codeSvc:        codeSvc,
