@@ -10,6 +10,8 @@ mock:
 	@mockgen -source=./internal/service/user.go -package=mocksvc -destination=./internal/service/mock/user.mock.go
 	@mockgen -source=./internal/service/code.go -package=mocksvc -destination=./internal/service/mock/code.mock.go
 
+	@mockgen -source=./internal/service/sms/types.go -package=sms_mocksvc -destination=./internal/service/sms/sms_mocksvc/sms.mock.go
+
 	@mockgen -source=./internal/repository/user.go -package=mocksvc -destination=./internal/repository/mock/user.mock.go
 	@mockgen -source=./internal/repository/code.go -package=mocksvc -destination=./internal/repository/mock/code.mock.go
 
@@ -17,6 +19,9 @@ mock:
 	@mockgen -source=./internal/repository/cache/user.go -package=cache_mocksvc -destination=./internal/repository/cache/mock/user.mock.go
 	@mockgen -source=./internal/repository/cache/code.go -package=cache_mocksvc -destination=./internal/repository/cache/mock/code.mock.go
 
+	@mockgen -source=./pkg/limiter/types.go -package=limiter_mocksvc -destination=./pkg/limiter/mock/limiter.mock.go
+
 	@mockgen -package=redis_mock -destination=./internal/repository/cache/redis_mock/cmd.mock.go github.com/redis/go-redis/v9 Cmdable
+
 
 	@go mod tidy

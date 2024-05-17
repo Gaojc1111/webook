@@ -16,31 +16,31 @@ func TestRedisCodeCache_Set(t *testing.T) {
 		return fmt.Sprintf("phone_code:%s:%s", biz, phone)
 	}
 	testCases := []struct {
-		keyFunc func(ctrl *gomock.Controller) redis.Cmdable
-		name    string
-		mock    func(ctrl *gomock.Controller) redis.Cmdable
-		ctx     context.Context
-		biz     string
-		phone   string
-		code    string
+		name  string
+		mock  func(ctrl *gomock.Controller) redis.Cmdable
+		ctx   context.Context
+		biz   string
+		phone string
+		code  string
+
 		wantErr error
 	}{
 		{
-			name: "缓存成功",
+			name: "设置成功",
 			mock: func(ctrl *gomock.Controller) redis.Cmdable {
 				res := redis_mock.NewMockCmdable(ctrl)
 				cmd := redis.NewCmd(context.Background())
 				cmd.SetErr(nil)
 				cmd.SetVal(int64(0))
-				res.EXPECT().
-					Eval(gomock.Any(), luaSetCode, []string{(keyFunc("test", "12312345678"))}, "123").
-					Return(cmd)
+				res.EXPECT().Eval(gomock.Any(), luaSetCode,
+					[]string{keyFunc("test", "15212345678")},
+					[]any{"123456"}).Return(cmd)
 				return res
 			},
 			ctx:     context.Background(),
 			biz:     "test",
-			phone:   "12312345678",
-			code:    "123",
+			phone:   "15212345678",
+			code:    "123456",
 			wantErr: nil,
 		},
 		{

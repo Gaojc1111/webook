@@ -8,6 +8,8 @@ import (
 	"time"
 	"webook/internal/web"
 	"webook/internal/web/middlewares"
+	"webook/pkg/ginx/middleware/ratelimit"
+	"webook/pkg/limiter"
 )
 
 func InitWebServer(userHandler *web.UserHandler, middlewares []gin.HandlerFunc) *gin.Engine {
@@ -44,7 +46,7 @@ func InitGinMiddlewares(redisClient redis.Cmdable) []gin.HandlerFunc {
 			IgnorePaths("/users/login_sms").
 			Build(),
 		// redis限流中间件
-		//ratelimit.NewBuilder(redisClient, time.Second, 1).Build(),
+		ratelimit.NewBuilder(limiter.NewRedisSlidingWindowLimiter(redisClient, time.Second, 1000)).Build(),
 		gin.Logger(),
 		gin.Recovery(),
 	}
