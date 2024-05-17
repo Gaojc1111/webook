@@ -34,10 +34,12 @@ func NewCachedUserRepository(dao dao.UserDAO, c cache.UserCache) UserRepository 
 
 func (repo *CachedUserRepository) toDomain(u dao.User) domain.User {
 	return domain.User{
-		ID:       u.ID,
-		Email:    u.Email.String,
-		Phone:    u.Phone.String,
-		Password: u.Password,
+		ID:        u.ID,
+		Email:     u.Email.String,
+		Phone:     u.Phone.String,
+		Password:  u.Password,
+		CreatedAt: u.CreateTime,
+		UpdatedAt: u.UpdateTime,
 	}
 }
 
@@ -75,27 +77,24 @@ func (r *CachedUserRepository) FindByEmail(ctx context.Context, email string) (d
 func (r *CachedUserRepository) FindByID(ctx context.Context, id int64) (domain.User, error) {
 	// 1.先查缓存
 	user, err := r.cache.Get(ctx, id)
-	if err != nil {
-		return user, err
+	if err == nil {
+		// 缓存命中
+		return user, nil
 	}
 	// 2.再查DB
 	u, err := r.dao.FindByID(ctx, id)
+	if err == ErrUserNotFound {
+		return domain.User{}, ErrUserNotFound
+	}
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	user = domain.User{
-		ID:       u.ID,
-		Email:    u.Email.String,
-		Password: u.Password,
+	user = r.toDomain(u)
+	//go func() {
+	if err := r.cache.Set(ctx, user); err != nil {
+		//日志，监控
 	}
-	go func() {
-		err = r.cache.Set(ctx, user)
-		// 缓存崩了怎么办
-		if err != nil {
-			//日志，监控
-		}
-	}()
 	return user, err
 }
 

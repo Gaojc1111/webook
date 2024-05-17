@@ -46,19 +46,19 @@ func (svc *userService) Login(ctx context.Context, email, password string) (doma
 	user, err := svc.repo.FindByEmail(ctx, email)
 	if err == repository.ErrUserNotFound {
 		// todo
-		return user, ErrInvalidUserOrPassword
+		return domain.User{}, ErrInvalidUserOrPassword
 	}
 	if err != nil {
-		return user, err
+		return domain.User{}, err
 	}
 	// 比较密码
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		// todo 打印日志
-		return user, ErrInvalidUserOrPassword
+		return domain.User{}, ErrInvalidUserOrPassword
 	}
 	// 没问题
-	return user, nil
+	return domain.User{}, nil
 }
 
 func (svc *userService) Profile(ctx context.Context, id int64) (domain.User, error) {

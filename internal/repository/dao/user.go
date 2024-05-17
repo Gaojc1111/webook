@@ -67,6 +67,9 @@ func (dao *GormUserDAO) FindByID(ctx context.Context, id int64) (User, error) {
 	user := User{}
 	// 查找email = email 的第一条记录
 	err := dao.db.WithContext(ctx).Where("id = ?", id).First(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		return user, ErrUserNotFound
+	}
 	return user, err
 }
 

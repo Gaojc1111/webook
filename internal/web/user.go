@@ -106,7 +106,7 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 	})
 
 	if err == service.ErrUserDuplicated {
-		ctx.String(http.StatusInternalServerError, "该邮箱已被注册")
+		ctx.String(http.StatusBadRequest, "该邮箱已被注册")
 		return
 	}
 	if err != nil {
@@ -114,9 +114,7 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "注册成功！！！",
-	})
+	ctx.String(http.StatusOK, "注册成功")
 
 }
 

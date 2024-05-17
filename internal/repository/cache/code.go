@@ -49,15 +49,13 @@ func (c *RedisCodeCache) Set(ctx context.Context, biz, phone, code string) error
 		return err // 如果有错误发生，则直接返回错误。
 	}
 	switch res {
-	case 0:
-		// 操作成功。
-		return nil
+	case -2:
+		return errors.New("验证码存在，但是没有过期时间")
 	case -1:
 		// 发送验证码过于频繁的错误。
 		return ErrCodeSendTooMany
 	default:
-		// 其他未知错误。
-		return errors.New("系统错误")
+		return nil
 	}
 }
 
@@ -78,5 +76,5 @@ func (c *RedisCodeCache) Verify(ctx context.Context, biz, phone, code string) (b
 }
 
 func (c *RedisCodeCache) Key(biz, phone string) string {
-	return fmt.Sprintf("phone:_code:%s:%s", biz, phone)
+	return fmt.Sprintf("phone_code:%s:%s", biz, phone)
 }
