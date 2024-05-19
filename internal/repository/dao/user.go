@@ -4,9 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"github.com/go-sql-driver/mysql"
-	"time"
-
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
@@ -19,6 +18,7 @@ type UserDAO interface {
 	FindByPhone(ctx context.Context, phone string) (User, error)
 	FindByEmail(ctx context.Context, email string) (User, error)
 	FindByID(ctx context.Context, id int64) (User, error)
+	FindByWechat(ctx context.Context, openID string) (User, error)
 }
 
 type GormUserDAO struct {
@@ -28,12 +28,14 @@ type GormUserDAO struct {
 // User 直接对应数据库表
 // entity/model
 type User struct {
-	ID         int64          `gorm:"primaryKey,autoIncrement"`
-	Email      sql.NullString `gorm:"unique"`
-	Password   string         `gorm:"column:Password"`
-	Phone      sql.NullString `gorm:"unique"`
-	CreateTime int64          `gorm:"column:createTime"`
-	UpdateTime int64          `gorm:"column:updateTime"`
+	ID            int64          `gorm:"primaryKey,autoIncrement"`
+	Email         sql.NullString `gorm:"unique"`
+	Password      string         `gorm:"column:Password"`
+	Phone         sql.NullString `gorm:"unique"`
+	CreateTime    int64          `gorm:"column:createTime"`
+	UpdateTime    int64          `gorm:"column:updateTime"`
+	WechatOpenID  sql.NullString `gorm:"column:wechatOpenID"`
+	WechatUnionID sql.NullString `gorm:"column:wechatUnionID"`
 }
 
 func NewUserDAO(db *gorm.DB) UserDAO {
@@ -76,5 +78,14 @@ func (dao *GormUserDAO) FindByID(ctx context.Context, id int64) (User, error) {
 func (dao *GormUserDAO) FindByPhone(ctx context.Context, phone string) (User, error) {
 	var user User
 	err := dao.db.WithContext(ctx).Where("phone = ?", phone).First(&user).Error
+	return user, err
+}
+
+func (dao *GormUserDAO) FindByWechat(ctx context.Context, openID string) (User, error) {
+	var user User
+	err := dao.db.WithContext(ctx).Where("wechatOpenID = ?", openID).First(&user).Error
+	if err == gorm.ErrRecordNotFound {
+		return user, ErrUserNotFound
+	}
 	return user, err
 }

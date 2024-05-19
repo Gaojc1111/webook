@@ -12,9 +12,10 @@ import (
 	"webook/pkg/limiter"
 )
 
-func InitWebServer(userHandler *web.UserHandler, middlewares []gin.HandlerFunc) *gin.Engine {
+func InitWebServer(userHandler *web.UserHandler, wechatHandler *web.OAuth2WechatHandler, middlewares []gin.HandlerFunc) *gin.Engine {
 	server := gin.Default()
 	server.Use(middlewares...)
+	wechatHandler.RegisterRoutes(server)
 	userHandler.RegisterRoutes(server)
 	return server
 }
@@ -44,6 +45,8 @@ func InitGinMiddlewares(redisClient redis.Cmdable) []gin.HandlerFunc {
 			IgnorePaths("/users/signup").
 			IgnorePaths("/users/login_sms/code/send").
 			IgnorePaths("/users/login_sms").
+			IgnorePaths("/oauth2/wechat/authurl").
+			IgnorePaths("/oauth2/wechat/callback").
 			Build(),
 		// redis限流中间件
 		ratelimit.NewBuilder(limiter.NewRedisSlidingWindowLimiter(redisClient, time.Second, 1000)).Build(),

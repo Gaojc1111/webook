@@ -26,11 +26,12 @@ func initWebServer() *gin.Engine {
 		repository.NewCachedUserRepository, repository.NewCodeRepository,
 
 		// service
-		ioc.InitSMSService,
+		ioc.InitSMSService, ioc.InitWechatService,
 		service.NewUserService, service.NewCodeService,
 
 		// handler
 		web.NewUserHandler, ioc.InitGinMiddlewares, ioc.InitWebServer,
+		web.NewOAuth2WechatHandler,
 	)
 	return gin.Default()
 }

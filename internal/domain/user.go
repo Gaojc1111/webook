@@ -2,6 +2,7 @@ package domain
 
 // User 领域对象
 type User struct {
+	WechatInfo
 	ID        int64
 	Email     string
 	Password  string

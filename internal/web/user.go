@@ -4,13 +4,11 @@ import (
 	"errors"
 	"github.com/gin-contrib/sessions"
 	"net/http"
-	"time"
 	"webook/internal/domain"
 	"webook/internal/service"
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -27,8 +25,9 @@ var (
 
 // UserHandler 定义用户相关路由
 type UserHandler struct {
-	svc            service.UserService
-	codeSvc        service.CodeService
+	svc     service.UserService
+	codeSvc service.CodeService
+	JWTHandler
 	regexpEmail    *regexp.Regexp
 	regexpPassword *regexp.Regexp
 }
@@ -118,12 +117,6 @@ func (u *UserHandler) SignUp(ctx *gin.Context) {
 
 }
 
-type UserClaims struct {
-	jwt.RegisteredClaims
-	UserID    int64
-	UserAgent string
-}
-
 func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	type LoginReq struct {
 		Email    string `json:"email"`
@@ -146,23 +139,6 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	default:
 		ctx.String(http.StatusOK, "系统错误")
 	}
-}
-
-func (u *UserHandler) setJWTToken(ctx *gin.Context, userID int64) {
-	claims := UserClaims{
-		UserID:    userID,
-		UserAgent: ctx.Request.UserAgent(),
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	tokenStr, err := token.SignedString([]byte("Hbzhtd0211"))
-
-	if err != nil {
-		ctx.String(http.StatusInternalServerError, "系统错误")
-	}
-	ctx.Header("x-jwt-token", tokenStr)
 }
 
 func (u *UserHandler) Login(ctx *gin.Context) {
