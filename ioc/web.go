@@ -30,7 +30,7 @@ func InitGinMiddlewares(redisClient redis.Cmdable) []gin.HandlerFunc {
 			AllowMethods: []string{"PUT", "PATCH", "GET", "POST"},
 			AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
 			// JWT 放行
-			ExposeHeaders: []string{"Content-Length", "x-jwt-token"},
+			ExposeHeaders: []string{"Content-Length", "x-jwt-token", "x-refresh-token"},
 
 			AllowCredentials: true,
 			// 放行所有包含http://localhost 前缀的域名

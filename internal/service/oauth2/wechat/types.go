@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	uuid "github.com/lithammer/shortuuid/v4"
 	"net/http"
 	"net/url"
 	"webook/internal/domain"
@@ -15,7 +14,7 @@ var (
 )
 
 type Service interface {
-	AuthURL(ctx context.Context) (string, error)
+	AuthURL(ctx context.Context, state string) (string, error)
 	VerifyCode(ctx context.Context, code string) (domain.WechatInfo, error)
 }
 
@@ -69,8 +68,7 @@ func (s *service) VerifyCode(ctx context.Context, code string) (domain.WechatInf
 	}, nil
 }
 
-func (s *service) AuthURL(ctx context.Context) (string, error) {
+func (s *service) AuthURL(ctx context.Context, state string) (string, error) {
 	const authURLPattern = `https://open.weixin.qq.com/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_login&state=%s#wechat_redirect`
-	state := uuid.New()
 	return fmt.Sprintf(authURLPattern, s.appID, redirectURL, state), nil
 }

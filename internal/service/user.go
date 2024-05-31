@@ -59,7 +59,7 @@ func (svc *userService) Login(ctx context.Context, email, password string) (doma
 		return domain.User{}, ErrInvalidUserOrPassword
 	}
 	// 没问题
-	return domain.User{}, nil
+	return user, nil
 }
 
 func (svc *userService) Profile(ctx context.Context, id int64) (domain.User, error) {

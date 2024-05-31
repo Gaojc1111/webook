@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"github.com/gin-contrib/sessions"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"webook/internal/domain"
 	"webook/internal/service"
@@ -37,6 +38,7 @@ func NewUserHandler(svc service.UserService, codeSvc service.CodeService) *UserH
 	return &UserHandler{
 		svc:            svc,
 		codeSvc:        codeSvc,
+		JWTHandler:     NewJWTHandler(),
 		regexpEmail:    regexEmail,
 		regexpPassword: regexPassword,
 	}
@@ -49,6 +51,7 @@ func (u *UserHandler) RegisterRoutes(server *gin.Engine) {
 	{
 		ug.POST("/signup", u.SignUp)
 		ug.POST("/login", u.LoginJWT)
+		ug.POST("/refresh_token", u.RefreshToken)
 		ug.POST("/logout", u.Logout)
 		ug.POST("/edit", u.Edit)
 		ug.GET("/profile", u.Profile)
@@ -132,7 +135,10 @@ func (u *UserHandler) LoginJWT(ctx *gin.Context) {
 	user, err := u.svc.Login(ctx, req.Email, req.Password)
 	switch err {
 	case nil:
-		u.setJWTToken(ctx, user.ID)
+		err := u.setJWTToken(ctx, user.ID)
+		if err != nil {
+			ctx.String(http.StatusOK, "系统错误")
+		}
 		ctx.String(http.StatusOK, "登录成功")
 	case service.ErrInvalidUserOrPassword:
 		ctx.String(http.StatusOK, "邮箱或密码错误")
@@ -193,6 +199,7 @@ func (u *UserHandler) Logout(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Edit(ctx *gin.Context) {
+	_ = ctx
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
@@ -273,4 +280,26 @@ func (h *UserHandler) SendSmsCode(ctx *gin.Context) {
 		})
 		// todo：补日志
 	}
+}
+
+func (u *UserHandler) RefreshToken(ctx *gin.Context) {
+	tokenStr := ParseToken(ctx)
+	var claims RefreshClaims
+	token, err := jwt.ParseWithClaims(tokenStr, &claims, func(token *jwt.Token) (interface{}, error) {
+		return u.refresh_key, nil
+	})
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if token == nil || !token.Valid {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	err = u.setJWTToken(ctx, claims.UserID)
+	if err != nil {
+		ctx.String(http.StatusBadRequest, "系统错误")
+		return
+	}
+	ctx.String(http.StatusOK, "刷新成功")
 }
